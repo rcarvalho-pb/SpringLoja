@@ -26,14 +26,4 @@ public class CategoriaResource {
         return ResponseEntity.ok().body(categoriaService.buscar(id));
     }
 
-    @GetMapping(value = "instantiate")
-    public void instantiate(){
-        Categoria cat1 = new Categoria();
-        cat1.setNome("Informática");
-        Categoria cat2 = new Categoria();
-        cat2.setNome("Escritorio");
-        categoriaService.save(cat1);
-        categoriaService.save(cat2);
-    }
-
 }
