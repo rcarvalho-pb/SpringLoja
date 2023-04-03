@@ -1,12 +1,15 @@
 package com.ramon.cursomc;
 
 import com.ramon.cursomc.domain.*;
+import com.ramon.cursomc.domain.enums.EstadoPagamento;
 import com.ramon.cursomc.domain.enums.TipoCliente;
 import com.ramon.cursomc.repositories.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,14 +21,18 @@ public class CursomcApplication implements CommandLineRunner {
     private final EstadoRepository estadoRepository;
     private final ClienteRepository clienteRepository;
     private final EnderecoRepository enderecoRepository;
+    private final PedidoRepository pedidoRepository;
+    private final PagamentoRepository pagamentoRepository;
 
-    public CursomcApplication(CategoriaRepository categoriaRepository, ProdutoRepository produtoRepository, CidadeRepository cidadeRepository, EstadoRepository estadoRepository, ClienteRepository clienteRepository, EnderecoRepository enderecoRepository) {
+    public CursomcApplication(CategoriaRepository categoriaRepository, ProdutoRepository produtoRepository, CidadeRepository cidadeRepository, EstadoRepository estadoRepository, ClienteRepository clienteRepository, EnderecoRepository enderecoRepository, PedidoRepository pedidoRepository, PagamentoRepository pagamentoRepository) {
         this.categoriaRepository = categoriaRepository;
         this.produtoRepository = produtoRepository;
         this.cidadeRepository = cidadeRepository;
         this.estadoRepository = estadoRepository;
         this.clienteRepository = clienteRepository;
         this.enderecoRepository = enderecoRepository;
+        this.pedidoRepository = pedidoRepository;
+        this.pagamentoRepository = pagamentoRepository;
     }
 
     public static void main(String[] args) {
@@ -76,5 +83,21 @@ public class CursomcApplication implements CommandLineRunner {
 
         clienteRepository.save(cli1);
         enderecoRepository.saveAll(List.of(e1, e2));
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        Pedido ped1 = new Pedido(null, LocalDateTime.parse("30/09/2017 10:32", dtf), cli1, e1);
+        Pedido ped2 = new Pedido(null, LocalDateTime.parse("10/10/2017 19:35", dtf), cli1, e2);
+
+        Pagamento pagto1 = new PagamentoComCartao(null, EstadoPagamento.QUITADO, ped1, 6);
+        ped1.setPagamento(pagto1);
+        Pagamento pagto2 = new PagamentoComBoleto(null, EstadoPagamento.PENDENTE, ped2, LocalDateTime.parse("20/10/2017 00:00", dtf), null);
+        ped2.setPagamento(pagto2);
+
+        cli1.getPedidos().addAll(List.of(ped1, ped2));
+
+        pedidoRepository.saveAll(List.of(ped1, ped2));
+        pagamentoRepository.saveAll(List.of(pagto1, pagto2));
+
     }
 }
